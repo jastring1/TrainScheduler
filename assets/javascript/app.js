@@ -26,7 +26,7 @@ $("#add-train").on("click", function (event) {
         alert("Invalid Times. Try again")
     } else {
 
-        database.ref().push({
+        database.ref("/trains").push({
             name: name,
             destination: destination,
             first: first,
@@ -39,14 +39,19 @@ $("#add-train").on("click", function (event) {
     $("#frequency-input").val("");
 });
 
-database.ref().on("child_added", function (snapshot) {
+database.ref("/trains").on("child_added", function (snapshot) {
     var sv = snapshot.val();
     var timeDiff = moment().diff(moment.unix(sv.first), "minutes");
     var timeRemainder = timeDiff % sv.frequency;
     var minTill = sv.frequency - timeRemainder;
     var nextTrain = moment().add(minTill, "m").format("hh:mm A");
-    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td> </tr>");
+    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td><td><button type='button' class='btn btn-danger'>Delete</button> </tr>");
 
 }, function (errorObject) {
     console.log("Errors handled: " + errorObject.code);
+});
+
+$("table").on("click", ".btn-danger", function () {
+    $(this).closest("tr").remove();
+    database.ref("/trains/").remove();
 });
