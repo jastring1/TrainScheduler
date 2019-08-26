@@ -37,18 +37,6 @@ $("#add-train").on("click", function (event) {
     $("#frequency-input").val("");
 });
 
-database.ref("/trains/").on("child_added", function (snapshot) {
-    var sv = snapshot.val();
-    var timeDiff = moment().diff(moment.unix(sv.first), "minutes");
-    var timeRemainder = timeDiff % sv.frequency;
-    var minTill = sv.frequency - timeRemainder;
-    var nextTrain = moment().add(minTill, "m").format("hh:mm A");
-    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td><td><button type='button' class='btn btn-danger' id=" + snapshot.key + ">Delete</button></td><td><button type='button' class='btn btn-success' id=" + snapshot.key + ">Update</button> </tr>");
-
-}, function (errorObject) {
-    console.log("Errors handled: " + errorObject.code);
-});
-
 $("table").on("click", ".btn-danger", function () {
     $(this).closest("tr").remove();
     var id = $(this).attr('id');
@@ -61,7 +49,6 @@ $("table").on("click", ".btn-success", function () {
     destination = $("#destination-input").val().trim();
     first = moment($("#first-input").val().trim(), "HH:mm").subtract(1, "years").format("X");
     frequency = $("#frequency-input").val().trim();
-
     if (name === "" || destination === "" || first === "" || frequency === "") {
         alert("Invalid Form. Try again")
     } else if (isNaN(first) || isNaN(frequency)) {
@@ -78,4 +65,18 @@ $("table").on("click", ".btn-success", function () {
     $("#destination-input").val("");
     $("#first-input").val("");
     $("#frequency-input").val("");
+    location.reload();
 });
+
+database.ref("/trains/").on("child_added", function (snapshot) {
+    var sv = snapshot.val();
+    var timeDiff = moment().diff(moment.unix(sv.first), "minutes");
+    var timeRemainder = timeDiff % sv.frequency;
+    var minTill = sv.frequency - timeRemainder;
+    var nextTrain = moment().add(minTill, "m").format("hh:mm A");
+    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td><td><button type='button' class='btn btn-danger' id=" + snapshot.key + ">Delete</button></td><td><button type='button' class='btn btn-success' id=" + snapshot.key + ">Update</button> </tr>");
+
+}, function (errorObject) {
+    console.log("Errors handled: " + errorObject.code);
+});
+
