@@ -43,7 +43,7 @@ database.ref("/trains/").on("child_added", function (snapshot) {
     var timeRemainder = timeDiff % sv.frequency;
     var minTill = sv.frequency - timeRemainder;
     var nextTrain = moment().add(minTill, "m").format("hh:mm A");
-    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td><td><button type='button' class='btn btn-danger' id=" + snapshot.key + ">Delete</button> </tr>");
+    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td><td><button type='button' class='btn btn-danger' id=" + snapshot.key + ">Delete</button></td><td><button type='button' class='btn btn-success' id=" + snapshot.key + ">Update</button> </tr>");
 
 }, function (errorObject) {
     console.log("Errors handled: " + errorObject.code);
@@ -53,4 +53,29 @@ $("table").on("click", ".btn-danger", function () {
     $(this).closest("tr").remove();
     var id = $(this).attr('id');
     database.ref("/trains/"+id).remove();
+});
+$("table").on("click", ".btn-success", function () {
+    var id = $(this).attr('id');
+    event.preventDefault();
+    name = $("#name-input").val().trim();
+    destination = $("#destination-input").val().trim();
+    first = moment($("#first-input").val().trim(), "HH:mm").subtract(1, "years").format("X");
+    frequency = $("#frequency-input").val().trim();
+
+    if (name === "" || destination === "" || first === "" || frequency === "") {
+        alert("Invalid Form. Try again")
+    } else if (isNaN(first) || isNaN(frequency)) {
+        alert("Invalid Times. Try again")
+    } else {
+        database.ref("/trains/"+id).set({
+            name: name,
+            destination: destination,
+            first: first,
+            frequency: frequency,
+        });
+    }
+    $("#name-input").val("");
+    $("#destination-input").val("");
+    $("#first-input").val("");
+    $("#frequency-input").val("");
 });
