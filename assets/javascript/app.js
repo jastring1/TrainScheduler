@@ -11,7 +11,6 @@ var config = {
 firebase.initializeApp(config);
 var database = firebase.database();
 
-
 $("#add-train").on("click", function (event) {
     event.preventDefault();
 
@@ -25,12 +24,11 @@ $("#add-train").on("click", function (event) {
     } else if (isNaN(first) || isNaN(frequency)) {
         alert("Invalid Times. Try again")
     } else {
-
-        database.ref("/trains").push({
+        database.ref("/trains/").push({
             name: name,
             destination: destination,
             first: first,
-            frequency: frequency
+            frequency: frequency,
         });
     }
     $("#name-input").val("");
@@ -39,13 +37,13 @@ $("#add-train").on("click", function (event) {
     $("#frequency-input").val("");
 });
 
-database.ref("/trains").on("child_added", function (snapshot) {
+database.ref("/trains/").on("child_added", function (snapshot) {
     var sv = snapshot.val();
     var timeDiff = moment().diff(moment.unix(sv.first), "minutes");
     var timeRemainder = timeDiff % sv.frequency;
     var minTill = sv.frequency - timeRemainder;
     var nextTrain = moment().add(minTill, "m").format("hh:mm A");
-    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td><td><button type='button' class='btn btn-danger'>Delete</button> </tr>");
+    $("#table-body").append("<tr>" + "<td>" + sv.name + "</td><td>" + sv.destination + "</td><td>" + sv.frequency + "</td><td>" + nextTrain + "</td><td>" + minTill + "</td><td><button type='button' class='btn btn-danger' id=" + snapshot.key + ">Delete</button> </tr>");
 
 }, function (errorObject) {
     console.log("Errors handled: " + errorObject.code);
@@ -53,5 +51,6 @@ database.ref("/trains").on("child_added", function (snapshot) {
 
 $("table").on("click", ".btn-danger", function () {
     $(this).closest("tr").remove();
-    database.ref("/trains/").remove();
+    var id = $(this).attr('id');
+    database.ref("/trains/"+id).remove();
 });
