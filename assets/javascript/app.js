@@ -54,7 +54,7 @@ $("table").on("click", ".btn-success", function () {
     } else if (isNaN(first) || isNaN(frequency)) {
         alert("Invalid Times. Try again")
     } else {
-        database.ref("/trains/"+id).set({
+        database.ref("/trains/"+id).update({
             name: name,
             destination: destination,
             first: first,
